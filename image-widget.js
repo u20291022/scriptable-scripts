@@ -6,7 +6,6 @@
 // get local file storage
 const localFiles = FileManager.local();
 const documentsPath = localFiles.documentsDirectory();
-// txt file that stores our image path
 const imageFile = localFiles.joinPath(documentsPath, "image.jpg");
 
 // if we are not in widget
