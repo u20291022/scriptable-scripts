@@ -58,24 +58,22 @@ if (!config.runsInWidget) {
     const formattedSleep = `${totalHours}:${totalMinutes < 10 ? "0" : ""}${totalMinutes}h`;
     const totalText = widget.addText(`Total Sleep: ${formattedSleep}`);
     totalText.font = Font.systemFont(14);
-    totalText.textColor = Color.black();
+    totalText.textColor = Color.white();
     totalText.centerAlignText();
     
     widget.addSpacer(5);
     
     const scoreText = widget.addText(`Sleep Score: ${sleepScore}`);
     scoreText.font = Font.systemFont(14);
-    scoreText.textColor = Color.black();
+    scoreText.textColor = Color.white();
     scoreText.centerAlignText();
     
     widget.addSpacer(5);
     
     const awakeText = widget.addText(`Awake Count: ${awakeCount}`);
     awakeText.font = Font.systemFont(14);
-    awakeText.textColor = Color.black();
+    awakeText.textColor = Color.white();
     awakeText.centerAlignText();
-    
-    widget.refreshAfterDate = new Date(Date.now() + 3600 * 1000);
 }
 
 Script.setWidget(widget);
