@@ -11,12 +11,12 @@ const groupName = args.widgetParameter;
 if (groupName) {
     const groupsRequest = new Request(groupsApiUri);
     const allGroups = await groupsRequest.loadJSON();
-    let bestMatch = allGroups.find(group => group.toLowerCase() === groupName.toLowerCase());
+    let bestMatch = allGroups.find(group => group.name.toLowerCase() === groupName.toLowerCase());
     if (!bestMatch) {
-        bestMatch = allGroups.find(group => group.toLowerCase().includes(groupName.toLowerCase()));
+        bestMatch = allGroups.find(group => group.name.toLowerCase().includes(groupName.toLowerCase()));
     }
     if (bestMatch) {
-        groupId = bestMatch;
+        groupId = bestMatch.id;
     }
 }
 
@@ -36,9 +36,9 @@ const nextLesson = timetableData.filter(lesson => {
     const dateValid = monthIndexValid && dayValid; 
     const lessonStartTimeString = lesson.lessonTime.start;
     const [startHours, startMinutes] = lessonStartTimeString.split(".").map(Number);
-    const hoursValid = startHours >= currentHour;
-    const minutesValid = startMinutes > currentMinutes;
-    const timeValid = isToday && hoursValid && minutesValid;
+    const startTime = startHours*60+startMinutes;
+    const currentTime = currentHour*60+currentMinutes;
+    const timeValid = isToday && (startTime > currentTime);
     return !isNewYear && (dateValid || timeValid);
 })[0];
 
@@ -46,30 +46,28 @@ let textForWidget = "There is no lessons in future"
 if (nextLesson) {
     const lessonStartTimeString = nextLesson.lessonTime.start;
     const [hours, minutes] = lessonStartTimeString.split(".").map(Number);
-
     // idk what is this. coded by copilot
     const now = new Date();
     const lessonDate = new Date(now.getFullYear(), nextLesson.date.monthIndex, nextLesson.date.day, hours, minutes, 0);
+    
     if (lessonDate < now) {
-        lessonDate.setFullYear(now.getFullYear() + 1);
+    lessonDate.setFullYear(now.getFullYear() + 1);
     }
     const diffMs = lessonDate - now;
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
     const diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-    const diffSeconds = Math.floor((diffMs % (1000 * 60)) / 1000);
+    const diffMinutes = Math.ceil((diffMs % (1000 * 60 * 60)) / (1000 * 60));
     
     let dateString = "";
     if (diffDays) dateString += diffDays + "d ";
     if (diffHours) dateString += diffHours + "h ";
     if (diffMinutes) dateString += diffMinutes + "m ";
-    if (diffSeconds) dateString += diffSeconds + "s ";
     // ^ coded by copilot
 
     textForWidget = `Next lesson in ${dateString}\n`;
     const firstGroup = nextLesson.subgroups[0];
     const secondGroup = nextLesson.subgroups[1];
-    textForWidget += `${secondGroup ? `(${firstGroup.name}):` : ""} `
+    textForWidget += `${firstGroup.name != "Все" ? `(${firstGroup.name}):` : ""} `
         + `[${firstGroup.classroom}] ${firstGroup.lessonName}`;
     if (secondGroup) {
         textForWidget += `\n(${secondGroup.name}): [${secondGroup.classroom}] ${secondGroup.lessonName}`;
